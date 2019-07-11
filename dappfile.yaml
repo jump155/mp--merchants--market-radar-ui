@@ -1,0 +1,62 @@
+{{ $_ := set . "AppPath" "/usr/src/app" }}
+{{ $_ := set . "UserName" "node" }}
+{{ $_ := set . "AppIndex" "/var/www/html" }}
+---
+dimg: market-radar-management-front
+from: node:10.15.1-stretch-slim
+docker:
+  CMD: ["nginx", "-g", "daemon off;"]
+  WORKDIR: {{ .AppIndex }}
+git:
+  - add: /
+    to: {{ .AppPath }}
+    stageDependencies:
+      install:
+      - package-lock.json
+      - package.json
+      - src/**
+      - public/**
+      - '*'
+
+ansible:
+  beforeInstall:
+  - name: "Upgrade apk"
+    shell: apt upgrade
+  - name: "Install some pckgs"
+    apt:
+      name:
+      - bash
+      - curl
+      - wget
+      - procps
+      - net-tools
+      - vim
+      - nginx
+
+      update_cache: yes
+  - name: "Add self-signed LMRU ROOT CA"
+    shell: wget http://igc.groupeadeo.com/ADEO_CERTIFICATE_CHAIN.crt -O /etc/ssl/cert.pem
+
+  install:
+
+  - name: "npm install"
+{{- include "env" . }}
+    shell: npm install ; npm run build
+    args:
+      chdir: {{ .AppPath }}
+  - name: "copy dist to www"
+    shell: mv /usr/src/app/dist/* /var/www/html/
+  - name: "copy ENV"
+    shell: mv /usr/src/app/.env /var/www/html/.env
+{{- define "env" }}
+
+    environment:
+      VUE_APP_URL_API: "https://matching-api-marketplace-dev.apps.lmru.tech/api/v1"
+#      VUE_APP_URL_API: "https://matching-api-marketplace-stage.apps.lmru.tech/api/v1"
+#      VUE_APP_URL_API: "https://matching-api-marketplace.apps.lmru.tech/api/v1"
+      VUE_APP_LM_OAUTH_AUTHORIZATION: "https://oauth.leroymerlin.ru/oauth-server/"
+      VUE_APP_LM_OAUTH_BASIC: "UlVMTS1NQVJLRVRQTEFDRTp0c3hjODlpYmZ0Z2M3Y3BvNzZybWg="
+#      VUE_APP_URL_API: "https://matching-api-marketplace-prod.apps.lmru.tech/api/v1"
+      NODE_EXTRA_CA_CERTS: "/etc/ssl/cert.pem"
+      LOG_LEVEL: "info"
+{{- end }}

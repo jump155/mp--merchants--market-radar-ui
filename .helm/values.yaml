@@ -1,0 +1,35 @@
+replicas:
+  market_radar_management_front:
+    _default: 1
+
+resources:
+  market_radar_management_front:
+    requests:
+      cpu:
+        _default: 0
+      memory:
+        _default: 512Mi
+    limits:
+      cpu:
+        _default: 0
+      memory:
+        _default: 512Mi
+tls:
+  wildcard:
+    _default: "wildcard-tls"
+
+app:
+  market_radar_management_front:
+    url_api:
+      _default: "https://matching-api-test-marketplace-dev.apps.lmru.tech/api/v1"
+      stage: "https://matching-api-stage-marketplace-stage.apps.lmru.tech/api/v1"
+    timezone_shift:
+      _default: "Europe/Moscow"
+    log_level:
+      _default: "info"
+    node_extra_ca_certs:
+      _default: "/etc/ssl/cert.pem"
+    rest_port:
+      _default: "80"
+    source_name:
+      _default: "FIAS"
