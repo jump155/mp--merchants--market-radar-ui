@@ -1,9 +1,9 @@
 replicas:
-  market_radar_management_front:
+  market_radar_ui:
     _default: 1
 
 resources:
-  market_radar_management_front:
+  market_radar_ui:
     requests:
       cpu:
         _default: 0
@@ -19,7 +19,7 @@ tls:
     _default: "wildcard-tls"
 
 app:
-  market_radar_management_front:
+  market_radar_ui:
     url_api:
       _default: "https://matching-api-test-marketplace-dev.apps.lmru.tech/api/v1"
       stage: "https://matching-api-stage-marketplace-stage.apps.lmru.tech/api/v1"

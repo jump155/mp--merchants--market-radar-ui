@@ -2,7 +2,7 @@
 {{ $_ := set . "UserName" "node" }}
 {{ $_ := set . "AppIndex" "/var/www/html" }}
 ---
-dimg: market-radar-management-front
+dimg: market-radar-ui
 from: node:10.15.1-stretch-slim
 docker:
   CMD: ["nginx", "-g", "daemon off;"]
