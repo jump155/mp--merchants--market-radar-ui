@@ -66,8 +66,9 @@
     >
       <v-toolbar-title class="headline text-uppercase" >
         <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-        <span class="font-weight-bold">MATCHING</span>
-        <span class="font-weight-light">MANAGEMENT</span>
+        <span class="font-weight-bold">MARKET</span>
+        <span class="font-weight-light">RADAR</span>
+        <span class="font-weight-bold">UI</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
     </v-toolbar>
@@ -80,7 +81,7 @@
 <script>
 // ...
 
-import { mapState, mapActions } from 'vuex'
+// import { mapState, mapActions } from 'vuex'
 
 export default {
   name: 'App',
@@ -89,11 +90,6 @@ export default {
     dialog: false,
     drawer: null,
     items: [
-      // {
-      //   icon: 'cloud_download',
-      //   text: 'Загружаемые отчеты',
-      //   href: '/#/reports'
-      // },
       {
         icon: 'collections',
         text: 'Products matching',
@@ -102,13 +98,8 @@ export default {
         children: [
           {
             icon: 'image_search',
-            text: 'Матчинг товаров по категориям',
+            text: 'Валидация матчинга',
             href: '/#/products-matching'
-          },
-          {
-            icon: 'image_search',
-            text: 'Тест',
-            href: '/#/products-matching-test'
           }
         ]
       },
@@ -184,10 +175,10 @@ export default {
     // })
   },
   computed: {
-    ...mapState({
-      // status: state => state.authorize.status,
-      // ldap: state => state.authorize.ldap
-    })
+    // ...mapState({
+    //   // status: state => state.authorize.status,
+    //   // ldap: state => state.authorize.ldap
+    // })
   }
   // beforeMount () {
   //   this.checkToken()
