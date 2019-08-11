@@ -9,7 +9,7 @@
           </v-flex>
           <v-flex xs12 v-if="matching_id_info">
             <v-img
-              :src="host.concat('image_path/logo?competitor=', matching_id_info.company_id)"
+              :src="getLogoUrl(matching_id_info.company_id.concat('.jpg'))"
               aspect-ratio="1"
               height="50"
               width="120"
@@ -17,48 +17,69 @@
             ></v-img>
           </v-flex>
         </v-layout>
-          <v-layout row wrap>
-            <v-flex xs12 v-if="matchingId && matching_id_info">
-              <product-card
-                :matchingId="matching_id_info.matching_id"
-                :product="matching_id_info"
-              >
-              </product-card>
-            </v-flex>
-            <div v-else></div>
-          </v-layout>
+        <br>
+        <v-layout row wrap>
+          <v-flex xs12 v-if="matchingId && matching_id_info">
+            <product-card
+              :matchingId="matching_id_info.matching_id"
+              :product="matching_id_info"
+            >
+            </product-card>
+          </v-flex>
+          <div v-else></div>
+        </v-layout>
       </v-flex>
 <!-------------------------------------------------РЕЗУЛЬТАТ ПОИСКА--------------------------------------------------->
       <v-divider vertical></v-divider>
       <v-flex xs9>
         <v-layout row wrap>
-          <v-flex xs12 >
+          <v-flex xs12>
             <h3 class="grey--text" style="padding-left: 12px">Компания, в которой происходит поиск</h3>
           </v-flex>
-          <v-flex xs3 v-if="competitor_company_id">
+          <v-flex xs2 v-if="competitor_company_id">
             <v-img
-              :src="host.concat('image_path/logo?competitor=', competitor_company_id)"
+              :src="getLogoUrl(competitor_company_id.concat('.jpg'))"
               aspect-ratio="1"
               height="50"
               width="120"
             ></v-img>
           </v-flex>
+          <v-flex xs2></v-flex>
           <v-flex xs3 v-if="competitor_company_id">
-            Отложить на: 14 дней, 30 дней, навсегда
+            <v-tooltip left>
+              <template v-slot:activator="{ on }">
+                <v-btn flat large color="indigo" v-on="on" @click="skipCandidate()">Отложить
+                  <v-icon right>skip_next</v-icon>
+                </v-btn>
+              </template>
+              <span>Отложить, пока не появятся другие варианты</span>
+            </v-tooltip>
+          </v-flex>
+          <v-flex xs2></v-flex>
+          <v-flex xs3 v-if="competitor_company_id">
+            <v-tooltip left>
+              <template v-slot:activator="{ on }">
+                <v-btn flat large color="orange" v-on="on" @click="hideCandidate()">скрыть навсегда
+                  <v-icon right>visibility_off</v-icon>
+                </v-btn>
+              </template>
+              <span>Никогда не показывать результаты для данного товара в данной компании.</span>
+            </v-tooltip>
           </v-flex>
         </v-layout>
+        <br>
         <v-layout row wrap v-if="matching_id_info" style="overflow-y: scroll;overflow-x: scroll; max-height: 80vh" >
           <v-flex xs3 v-for="sim in similars" :key="sim.matching_id">
             <product-card
               :matchingId="matching_id_info.matching_id"
               :product="sim"
+              :matchingIdBrand="matching_id_info.brand"
             >
             </product-card>
           </v-flex>
         </v-layout>
       </v-flex>
     </v-layout>
-<!--    </v-card>-->
   </v-container>
 </template>
 
@@ -83,11 +104,15 @@ export default {
   },
   methods: {
     ...mapActions({
-      getCandidate: 'productCompanyMatchings/getCandidate'
+      getCandidates: 'productCompanyMatchings/getCandidates',
+      nextCandidate: 'productCompanyMatchings/nextCandidate',
+      hideCandidate: 'productCompanyMatchings/hideCandidate',
+      matchProduct: 'productCompanyMatchings/matchProduct',
+      defferProduct: 'productCompanyMatchings/defferProduct'
     }),
     ...mapMutations({
       getProductCompanyMatchings: 'productCompanyMatchings/getProductCompanyMatchings',
-      holdOnCandidate: 'productCompanyMatchings/holdOnCandidate'
+      holdOnCandidates: 'productCompanyMatchings/holdOnCandidates'
     }),
     onOverMainImage (n) {
       this.main_photo_n = n
@@ -99,6 +124,20 @@ export default {
       const pageHeight = document.documentElement.scrollHeight
       const bottomOfPage = visible + scrollY >= pageHeight
       return bottomOfPage || pageHeight < visible
+    },
+    getLogoUrl (key) {
+      return this.s3_logos_bucket.getSignedUrl('getObject', {
+        Key: key,
+        Expires: 60 * 5
+      })
+    },
+    hideCandidate () {
+      this.hideCandidate()
+      this.nextCandidate()
+    },
+    nextCandidate () {
+      this.hideCandidate()
+      this.nextCandidate()
     }
   },
   computed: {
@@ -116,6 +155,15 @@ export default {
     },
     companyId () {
       return this.$store.state.productCompanyMatchings.companyId
+    },
+    status () {
+      return this.$store.state.productCompanyMatchings.companyId
+    },
+    candidates () {
+      return this.$store.state.productCompanyMatchings.candidates
+    },
+    s3_logos_bucket () {
+      return this.$store.state.productCompanyMatchings.s3_logos_bucket
     }
   },
   watch: {
@@ -131,8 +179,7 @@ export default {
     window.addEventListener('scroll', () => {
       this.bottom = this.bottomVisible()
     })
-    console.log('Component has been created!')
-    this.getCandidate()
+    this.getCandidates()
   }
 }
 </script>

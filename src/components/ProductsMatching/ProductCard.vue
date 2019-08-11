@@ -1,14 +1,14 @@
 <template>
   <v-card style="padding: 5px; margin: 7px">
     <v-img
-      :src="host.concat('image_path/image?matching_id=', product.matching_id, '&n=', main_photo_n)"
+      :src="getImageUrl(product.images_info[main_photo_n]['image_path'])"
       aspect-ratio="1"
     >
     </v-img>
     <v-layout row wrap>
       <v-flex v-for="n in product.images_info.length" :key="n" xs2>
         <v-img
-          :src="host.concat('image_path/image?matching_id=', product.matching_id, '&n=', n-1)"
+          :src="getImageUrl(product.images_info[n-1]['image_path'])"
           aspect-ratio="1"
           @mouseenter="main_photo_n = n-1"
           @mouseleave="main_photo_n = 0"
@@ -27,20 +27,14 @@
       </v-flex>
       <v-flex xs12>
         <span class="grey--text" style="font-size: smaller">марка: </span>
-        <span style="font-size: large">{{ product.brand }}</span>
-      </v-flex>
-      <v-flex xs12>
-        <v-layout row wrap class="grey--text" style="font-size: small">
-          <v-flex xs3>
-            qty: {{ product.qty }}
-          </v-flex>
-          <v-flex xs3>
-            pos: {{ product.pos }}
-          </v-flex>
-          <v-flex xs6>
-            dist: {{ Math.round(product.dist * 1000) / 1000 }}
-          </v-flex>
-        </v-layout>
+        <span
+          v-if="matchingIdBrand && (product.brand.toLowerCase() === matchingIdBrand.toLowerCase())"
+          style="color: darkgreen; font-size: x-large"
+        >
+          {{ product.brand }}&nbsp;&nbsp;
+          <v-icon color="green" large>done_all</v-icon>
+        </span>
+        <span v-else style="font-size: large">{{ product.brand }}</span>
       </v-flex>
       <v-flex xs12>
         <v-expansion-panel popout>
@@ -62,13 +56,13 @@
     <v-card-actions v-if="matchingId !== product.matching_id">
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
-          <v-btn flat color="green" v-on="on">
-            Match
+          <v-btn flat color="green" v-on="on" large>
+            Matching
           </v-btn>
         </template>
         <span>Матчинг с данным товаром</span>
       </v-tooltip>
-      <v-tooltip bottom>
+      <v-tooltip v-if="product.url" bottom>
         <template v-slot:activator="{ on }">
           <a :href="product.url" target="_blank" class="grey--text" style="text-decoration: none" v-on="on">
             НА САЙТ
@@ -82,13 +76,27 @@
 </template>
 
 <script>
+
 export default {
   name: 'ProductCard',
   data: () => ({
     main_photo_n: 0,
     host: process.env.VUE_APP_MATCHING_IMAGE_URL
   }),
-  props: ['matchingId', 'product']
+  methods: {
+    getImageUrl (key) {
+      return this.s3_images_bucket.getSignedUrl('getObject', {
+        Key: key,
+        Expires: 60 * 5
+      })
+    }
+  },
+  computed: {
+    s3_images_bucket () {
+      return this.$store.state.productCompanyMatchings.s3_images_bucket
+    }
+  },
+  props: ['matchingId', 'product', 'matchingIdBrand']
 }
 </script>
 
