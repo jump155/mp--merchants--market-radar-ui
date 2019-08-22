@@ -51,7 +51,7 @@ ansible:
 {{- define "env" }}
 
     environment:
-      VUE_APP_MARKET_RADAR_BACK_URL: "hhttps://market-radar-back-marketplace.apps.lmru.tech/api/v1/"
+      VUE_APP_MARKET_RADAR_BACK_URL: "https://market-radar-back-marketplace.apps.lmru.tech/api/v1/"
       NODE_EXTRA_CA_CERTS: "/etc/ssl/cert.pem"
       LOG_LEVEL: "info"
 {{- end }}
