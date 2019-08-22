@@ -115,7 +115,7 @@ export default {
   name: 'ProductsMatching',
   data: () => ({
     main_photo_n: 0,
-    c1: 'lm',
+    c1: 'petrovich',
     c2: 'obi',
     topN: 9,
     page: 1,
@@ -193,6 +193,13 @@ export default {
     }
   },
   watch: {
+    candidates (val) {
+      if (val.length === 0) {
+        let c1 = this.c1
+        let c2 = this.c2
+        this.getCandidates({ c1, c2 })
+      }
+    },
     page (val) {
       if (val >= 3) {
         this.pages = val + 1

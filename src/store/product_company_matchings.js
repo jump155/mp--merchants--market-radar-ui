@@ -47,7 +47,7 @@ const actions = {
       let companyId = state.candidates[0].company_id
       state.companyId = companyId
 
-      let topN = 15
+      let topN = 20
       console.log(matchingId, companyId, topN)
       commit('getProductCompanyMatchings', { matchingId, companyId, topN })
     } else {
