@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Home from './views/Home.vue'
 import ImageMatching from './components/ImageMatching/ImageMatching.vue'
 import ProductsMatching from './components/ProductsMatching/ProductsMatching.vue'
+import CategoriesMatching from './components/CategoriesMatching/CategoriesMatching.vue'
 
 Vue.use(Router)
 
@@ -23,6 +24,11 @@ export default new Router({
       path: '/products-matching',
       name: 'ProductsMatching',
       component: ProductsMatching
+    },
+    {
+      path: '/categories-matching',
+      name: 'CategoriesMatching',
+      component: CategoriesMatching
     }
     // {
     //   path: '/about',

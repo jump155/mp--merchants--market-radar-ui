@@ -92,20 +92,20 @@ export default {
     items: [
       {
         icon: 'collections',
-        text: 'Products matching',
+        text: 'Валидация матчинга',
         model: false,
         active: true,
-        children: [
-          {
-            icon: 'image_search',
-            text: 'Валидация матчинга',
-            href: '/#/products-matching'
-          }
-        ]
+        href: '/#/products-matching'
+        // children: [
+        //   {
+        //     icon: 'image_search',
+        //     text: 'Валидация матчинга',
+        //   }
+        // ]
       },
       {
         icon: 'collections',
-        text: 'Image matching',
+        text: 'Тестирование',
         model: false,
         active: false,
         children: [
@@ -113,36 +113,20 @@ export default {
             icon: 'image_search',
             text: 'Поиск по фото',
             href: '/#/image-matching'
+          },
+          {
+            icon: 'text_fields',
+            text: 'Поиск по тексту',
+            href: '/#/units'
           }
         ]
       },
       {
-        icon: 'text_fields',
-        text: 'Title matching',
-        model: false,
-        children: [
-          {
-            icon: 'timer_3',
-            text: 'units',
-            href: '/#/units'
-          }
-        ]
+        icon: 'pie_chart',
+        text: 'Матчинг категорий',
+        href: '/#/categories-matching'
+        // href: '/segmentation'
       }
-      // {
-      //   icon: 'pie_chart',
-      //   text: 'Сегментация товаров',
-      //   children: [
-      //     {
-      //       text: 'Мастер-каталог',
-      //       href: '/#/segmentation-master'
-      //     },
-      //     {
-      //       text: 'Кастомный каталог',
-      //       href: '/#/segmentation-custom'
-      //     }
-      //   ]
-      //   // href: '/segmentation'
-      // },
       // {
       //   icon: 'vertical_split',
       //   text: 'Categories matching',

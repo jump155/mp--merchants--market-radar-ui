@@ -6,6 +6,7 @@ import units from './store/units'
 // import segmentation from './store/segmentation'
 import imageModel from './store/image_model'
 import productCompanyMatchings from './store/product_company_matchings'
+import categoriesMatchings from './store/categories_matchings'
 // import reports from './store/reports'
 
 Vue.use(Vuex)
@@ -17,7 +18,8 @@ export default new Vuex.Store({
     // categories,
     // segmentation,
     imageModel,
-    productCompanyMatchings
+    productCompanyMatchings,
+    categoriesMatchings
     // reports
   }
 })
