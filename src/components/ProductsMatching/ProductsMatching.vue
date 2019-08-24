@@ -45,7 +45,22 @@
       </v-flex>
 <!-------------------------------------------------РЕЗУЛЬТАТ ПОИСКА--------------------------------------------------->
       <v-divider vertical></v-divider>
-      <v-flex xs9 v-if="!competitor_company_id || similars === null"></v-flex>
+      <v-flex xs9 v-if="!competitor_company_id || similars === null" >
+        <v-layout row wrap>
+          <v-flex xs5></v-flex>
+          <v-flex xs7>
+            <div class="text-center">
+              <br><br><br><br><br>
+              <v-progress-circular
+                :size="70"
+                :width="7"
+                color="green"
+                indeterminate
+              ></v-progress-circular>
+            </div>
+          </v-flex>
+        </v-layout>
+      </v-flex>
       <v-flex xs9 v-else>
         <v-layout row wrap>
           <v-flex xs12>
@@ -101,7 +116,7 @@
           v-if="matching_id_info"
           style="overflow-y: scroll;overflow-x: scroll; max-height: 80vh"
         >
-          <v-flex xs3 v-for="sim in similars.slice(0, 36)" :key="sim.matching_id">
+          <v-flex xs4 v-for="sim in similars.slice(0, 36)" :key="sim.matching_id">
             <product-card
               :matchingId="matching_id_info.matching_id"
               :product="sim"

@@ -1,19 +1,19 @@
 <template>
 <!--  <v-card :style="padding: 5px; margin: margin7px; background-color: #B4EFB4">-->
   <v-card :style="{background: bg, padding: '5px', margin: '7px'}">
+
     <v-img
       :src="getImageUrl(product.images_info[main_photo_n]['image_path'])"
       aspect-ratio="1"
     >
-      <v-card-title v-if="isMatched"
-                    class="align-start fill-height"
-                    style="color: darkgreen; font-size: larger"
+          <v-card-title class="align-end" v-if="isMatched"
+                    style="color: darkgreen; font-size: large; padding: 0; background-color: #d9ffd6"
       >MATCHING</v-card-title>
     </v-img>
-    <v-btn small flat>
-      класс
-    </v-btn>
-    {{ product.images_info[main_photo_n]['image_path'] }}
+<!--    <v-btn small flat>-->
+<!--      класс-->
+<!--    </v-btn>-->
+<!--    {{ product.images_info[main_photo_n]['image_path'] }}-->
     <v-layout row wrap>
       <v-flex v-for="n in product.images_info.slice(0, 12).length" :key="n" xs2>
         <v-img
@@ -38,41 +38,46 @@
         <span style="font-size: smaller">
           &nbsp;&nbsp;&nbsp; изображения:
           <span style="font-size: larger; color: green" v-if="product.score_image > 0.95">
-            {{ Math.round(product.score_image * 10000) / 100 }}%
+            {{ Math.round(product.score_image * 100) }}%
           </span>
           <span style="font-size: larger; color: darkolivegreen" v-else-if="product.score_image > 0.5">
-            {{ Math.round(product.score_image * 10000) / 100 }}%
+            {{ Math.round(product.score_image * 100) }}%
           </span>
           <span style="font-size: larger; color: darkgoldenrod" v-else>
-            {{ Math.round(product.score_image * 10000) / 100 }}%
+            {{ Math.round(product.score_image * 100) }}%
           </span>
         </span>
         <br>
         <span style="font-size: smaller">
           &nbsp;&nbsp;&nbsp; названия:
-          <span style="font-size: larger; color: green" v-if="product.score_image > 0.95">
-            {{ Math.round(product.score_title * 10000) / 100 }}%
+          <span style="font-size: larger; color: green" v-if="product.score_title > 0.95">
+            {{ Math.round(product.score_title * 100) }}%
           </span>
-          <span style="font-size: larger; color: darkolivegreen" v-else-if="product.score_image > 0.5">
-            {{ Math.round(product.score_title * 10000) / 100 }}%
+          <span style="font-size: larger; color: darkolivegreen" v-else-if="product.score_title > 0.5">
+            {{ Math.round(product.score_title * 100) }}%
           </span>
           <span style="font-size: larger; color: darkgoldenrod" v-else>
-            {{ Math.round(product.score_title * 10000) / 100 }}%
+            {{ Math.round(product.score_title * 100) }}%
           </span>
         </span>
       </v-flex>
       <v-flex xs12>
-        <span class="grey--text" style="font-size: smaller">марка: </span>
+
         <div v-if="product.brand && matchingIdInfo.brand">
           <span
             v-if="product.brand.toLowerCase().trim() === matchingIdInfo.brand.toLowerCase().trim()"
-            style="color: darkgreen; font-size: x-large"
+            style="font-size: smaller"
           >
-            {{ product.brand }}&nbsp;&nbsp;
-            <v-icon color="green" large>done_all</v-icon>
+            &nbsp;&nbsp;&nbsp;&nbsp;марка: <span style="color: darkgreen; font-size: large">{{ product.brand }}&nbsp;&nbsp;</span>
+            <v-icon color="green" v-if="product.matching_id != matchingIdInfo.matching_id">done_all</v-icon>
           </span>
-          <span v-else style="font-size: large">
-            {{ product.brand }}
+          <span v-else style="font-size: large; color: darkgoldenrod">
+            <span class="grey--text" style="font-size: small">марка: </span>{{ product.brand }}
+          </span>
+        </div>
+        <div v-else>
+          <span style="font-size: large; color: darkgoldenrod">
+            <span class="grey--text" style="font-size: small">марка: </span>{{ product.brand }}
           </span>
         </div>
       </v-flex>
@@ -96,7 +101,7 @@
     <v-card-actions v-if="matchingId !== product.matching_id">
       <v-tooltip v-if="!isMatched" bottom>
         <template v-slot:activator="{ on }">
-          <v-btn flat color="green" v-on="on" @click="onMatchProduct(matchingId, companyId, product.matching_id)" large>
+          <v-btn flat color="blue-grey darken-4" v-on="on" @click="onMatchProduct(matchingId, companyId, product.matching_id)" large>
             совпадение
           </v-btn>
         </template>
