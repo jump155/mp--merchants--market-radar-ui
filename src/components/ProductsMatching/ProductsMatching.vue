@@ -45,7 +45,8 @@
       </v-flex>
 <!-------------------------------------------------РЕЗУЛЬТАТ ПОИСКА--------------------------------------------------->
       <v-divider vertical></v-divider>
-      <v-flex xs9>
+      <v-flex xs9 v-if="!competitor_company_id || similars === null"></v-flex>
+      <v-flex xs9 v-else>
         <v-layout row wrap>
           <v-flex xs12>
             <h3 class="grey--text" style="padding-left: 12px">Компания, в которой происходит поиск</h3>
@@ -60,9 +61,17 @@
           </v-flex>
           <v-flex xs2></v-flex>
           <v-flex xs3 v-if="competitor_company_id">
-            <v-tooltip left v-if="has_matching === false">
+            <v-tooltip left v-if="matchingsToPost.length === 0 & matchingsToDelete.length === 0">
               <template v-slot:activator="{ on }">
-                <v-btn flat large color="indigo" v-on="on" @click="skipProduct(matching_id_info.matching_id, competitor_company_id)">Отложить
+                <v-btn
+                  flat
+                  large
+                  outline
+                  color="indigo"
+                  v-on="on"
+                  @click="onDefferProduct(matching_id_info.matching_id, competitor_company_id)"
+                >
+                  Пропустить
                   <v-icon right>skip_next</v-icon>
                 </v-btn>
               </template>
@@ -70,28 +79,28 @@
             </v-tooltip>
             <v-tooltip left v-else>
               <template v-slot:activator="{ on }">
-                <v-btn large dark color="indigo" v-on="on" @click="skipProduct(matching_id_info.matching_id, competitor_company_id)">Следующий
+                <v-btn
+                  large
+                  dark
+                  color="indigo"
+                  v-on="on"
+                  @click="onaAcceptChanges(matching_id_info.matching_id, competitor_company_id)"
+                >
+                  Подтвердить
                   <v-icon right>skip_next</v-icon>
                 </v-btn>
               </template>
-              <span>Больше нет матчинга</span>
+              <span>Подтвердить изменения и перейти к следующему товару</span>
             </v-tooltip>
           </v-flex>
-          <v-flex xs1></v-flex>
-          <v-flex xs3 v-if="competitor_company_id">
-            <v-tooltip left>
-              <template v-slot:activator="{ on }">
-                <v-btn flat large color="orange" v-on="on" @click="hideCandidate()">скрыть навсегда
-                  <v-icon right>visibility_off</v-icon>
-                </v-btn>
-              </template>
-              <span>Никогда не показывать результаты для данного товара в данной компании.</span>
-            </v-tooltip>
-          </v-flex>
-          <v-flex xs1></v-flex>
         </v-layout>
         <br>
-        <v-layout row wrap v-if="matching_id_info" style="overflow-y: scroll;overflow-x: scroll; max-height: 80vh" >
+        <v-layout
+          row
+          wrap
+          v-if="matching_id_info"
+          style="overflow-y: scroll;overflow-x: scroll; max-height: 80vh"
+        >
           <v-flex xs3 v-for="sim in similars.slice(0, 36)" :key="sim.matching_id">
             <product-card
               :matchingId="matching_id_info.matching_id"
@@ -131,15 +140,13 @@ export default {
       getCandidates: 'productCompanyMatchings/getCandidates',
       nextCandidate: 'productCompanyMatchings/nextCandidate',
       hideCandidate: 'productCompanyMatchings/hideCandidate',
+      acceptChanges: 'productCompanyMatchings/acceptChanges',
       defferProduct: 'productCompanyMatchings/defferProduct'
     }),
     ...mapMutations({
       getProductCompanyMatchings: 'productCompanyMatchings/getProductCompanyMatchings',
       holdOnCandidates: 'productCompanyMatchings/holdOnCandidates'
     }),
-    onOverMainImage (n) {
-      this.main_photo_n = n
-    },
     // for infinite scroll
     bottomVisible () {
       const scrollY = window.scrollY
@@ -158,9 +165,11 @@ export default {
       this.hideCandidate()
       this.nextCandidate()
     },
-    skipProduct (matchingId, companyId) {
+    onDefferProduct (matchingId, companyId) {
       this.defferProduct({ matchingId, companyId })
-    //   this.nextCandidate()
+    },
+    onaAcceptChanges (matchingId, companyId) {
+      this.acceptChanges({ matchingId, companyId })
     }
   },
   computed: {
@@ -185,11 +194,14 @@ export default {
     s3_logos_bucket () {
       return this.$store.state.productCompanyMatchings.s3_logos_bucket
     },
-    has_matching () {
-      return this.$store.state.productCompanyMatchings.has_matching
-    },
     companies () {
       return this.$store.state.productCompanyMatchings.companies
+    },
+    matchingsToPost () {
+      return this.$store.state.productCompanyMatchings.matchingsToPost
+    },
+    matchingsToDelete () {
+      return this.$store.state.productCompanyMatchings.matchingsToDelete
     }
   },
   watch: {

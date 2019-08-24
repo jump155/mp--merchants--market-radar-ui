@@ -1,5 +1,6 @@
 <template>
-  <v-card style="padding: 5px; margin: 7px; ">
+<!--  <v-card :style="padding: 5px; margin: margin7px; background-color: #B4EFB4">-->
+  <v-card :style="{background: bg, padding: '5px', margin: '7px'}">
     <v-img
       :src="getImageUrl(product.images_info[main_photo_n]['image_path'])"
       aspect-ratio="1"
@@ -23,48 +24,61 @@
         </v-img>
       </v-flex>
       <v-flex xs12>
-        <span class="grey--text" style="font-size: smaller">{{ product.company_product_id }}</span>
+        <span class="grey--text" style="font-size: smaller">арт: {{ product.company_product_id }}</span>
       </v-flex>
       <v-flex xs12>
         <span>{{ product.title }}</span>
-<!--        <span>{{ product.attributes }}</span>-->
       </v-flex>
       <v-flex xs12>
         <span class="deep-orange--text" style="font-size: larger">{{ product.price }}</span>
         <span class="grey--text" style="font-size: smaller"> руб.</span>
       </v-flex>
-      <v-flex xs12>
-        <span style="font-size: larger">
-          image: {{ Math.round(product.score_image * 100) / 100 }}
+      <v-flex xs12 v-if="product.matching_id !== matchingId">
+        <span style="font-size: smaller; color: darkgray">совпадение:</span><br>
+        <span style="font-size: smaller">
+          &nbsp;&nbsp;&nbsp; изображения:
+          <span style="font-size: larger; color: green" v-if="product.score_image > 0.95">
+            {{ Math.round(product.score_image * 10000) / 100 }}%
+          </span>
+          <span style="font-size: larger; color: darkolivegreen" v-else-if="product.score_image > 0.5">
+            {{ Math.round(product.score_image * 10000) / 100 }}%
+          </span>
+          <span style="font-size: larger; color: darkgoldenrod" v-else>
+            {{ Math.round(product.score_image * 10000) / 100 }}%
+          </span>
         </span>
         <br>
-        <span style="font-size: larger">
-          title: {{ Math.round(product.score_title * 100) / 100 }}
+        <span style="font-size: smaller">
+          &nbsp;&nbsp;&nbsp; названия:
+          <span style="font-size: larger; color: green" v-if="product.score_image > 0.95">
+            {{ Math.round(product.score_title * 10000) / 100 }}%
+          </span>
+          <span style="font-size: larger; color: darkolivegreen" v-else-if="product.score_image > 0.5">
+            {{ Math.round(product.score_title * 10000) / 100 }}%
+          </span>
+          <span style="font-size: larger; color: darkgoldenrod" v-else>
+            {{ Math.round(product.score_title * 10000) / 100 }}%
+          </span>
         </span>
       </v-flex>
       <v-flex xs12>
         <span class="grey--text" style="font-size: smaller">марка: </span>
-        <div v-if="product.brand && matchingIdBrand">
+        <div v-if="product.brand && matchingIdInfo.brand">
           <span
-            v-if="matchingIdBrand && (product.brand.toLowerCase() === matchingIdBrand.toLowerCase())"
+            v-if="product.brand.toLowerCase().trim() === matchingIdInfo.brand.toLowerCase().trim()"
             style="color: darkgreen; font-size: x-large"
           >
             {{ product.brand }}&nbsp;&nbsp;
             <v-icon color="green" large>done_all</v-icon>
           </span>
           <span v-else style="font-size: large">
-            {{ matchingIdInfo.brand }}
+            {{ product.brand }}
           </span>
-<!--          {{ product.brand }}-->
         </div>
-<!--        <span tyle="font-size: large">-->
-<!--            {{ product.brand }}-->
-<!--          </span>-->
       </v-flex>
       <v-flex xs12>
-<!--        {{ isMatched }}-->
         <v-expansion-panel popout>
-          <v-expansion-panel-content>
+          <v-expansion-panel-content :style="{background: bg}">
             <template v-slot:header>
               <div>Атрибуты</div>
             </template>
@@ -80,18 +94,27 @@
       </v-flex>
     </v-layout>
     <v-card-actions v-if="matchingId !== product.matching_id">
-      <v-tooltip bottom>
+      <v-tooltip v-if="!isMatched" bottom>
         <template v-slot:activator="{ on }">
           <v-btn flat color="green" v-on="on" @click="onMatchProduct(matchingId, companyId, product.matching_id)" large>
-            Matching
+            совпадение
           </v-btn>
         </template>
         <span>Матчинг с данным товаром</span>
       </v-tooltip>
+      <v-tooltip v-else bottom>
+        <template v-slot:activator="{ on }">
+          <v-btn flat color="orange" v-on="on" @click="onDeleteMatching(matchingId, companyId, product.matching_id)" large>
+            Отменить
+          </v-btn>
+        </template>
+        <span>Отменить матчинг с данным товаром</span>
+      </v-tooltip>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <v-tooltip v-if="product.url" bottom>
         <template v-slot:activator="{ on }">
           <a :href="product.url" target="_blank" class="grey--text" style="text-decoration: none" v-on="on">
-            НА САЙТ
+<!--            НА САЙТ-->
             <v-icon>language</v-icon>
           </a>
         </template>
@@ -103,20 +126,23 @@
 
 <script>
 
-import { mapActions } from 'vuex'
+import { mapMutations } from 'vuex'
 
 export default {
   name: 'ProductCard',
   data: () => ({
     main_photo_n: 0,
     golden_category_name: '',
+    bg: 'white',
     host: process.env.VUE_APP_MATCHING_IMAGE_URL,
-    isMatched: false
+    isMatched: false,
+    isOriginallyMatched: false
   }),
   methods: {
-    ...mapActions({
-      matchProduct: 'productCompanyMatchings/matchProduct',
-      nextCandidate: 'productCompanyMatchings/nextCandidate'
+    ...mapMutations({
+      addMatchingToPost: 'productCompanyMatchings/addMatchingToPost',
+      addMatchingToDelete: 'productCompanyMatchings/addMatchingToDelete',
+      removeMatchingFromPost: 'productCompanyMatchings/removeMatchingFromPost'
     }),
     getImageUrl (key) {
       return this.s3_images_bucket.getSignedUrl('getObject', {
@@ -125,8 +151,19 @@ export default {
       })
     },
     onMatchProduct (matchingId, companyId, companyMatchingId) {
-      this.matchProduct({ matchingId, companyId, companyMatchingId })
+      if (!this.isOriginallyMatched) {
+        this.addMatchingToPost(companyMatchingId)
+      }
       this.isMatched = true
+      this.bg = '#d9ffd6'
+    },
+    onDeleteMatching (matchingId, companyId, companyMatchingId) {
+      if (this.isOriginallyMatched) {
+        this.addMatchingToDelete(companyMatchingId)
+      }
+      this.removeMatchingFromPost(companyMatchingId)
+      this.isMatched = false
+      this.bg = 'white'
     }
   },
   computed: {

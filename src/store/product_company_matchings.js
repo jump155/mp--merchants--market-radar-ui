@@ -11,7 +11,8 @@ const state = {
   matchingId: null,
   candidates: null,
   status: null,
-  has_matching: false,
+  matchingsToPost: [],
+  matchingsToDelete: [],
   s3_images_bucket: new AWS.S3({
     accessKeyId: 'reZerictERS',
     secretAccessKey: 'wJalrXUtnFEMIK7MDENGbPxRfiCYEXAMPLEKEY',
@@ -37,24 +38,14 @@ const getters = {
 
 // actions
 const actions = {
-  nextCandidate ({ commit, state }) {
-    state.candidates.shift()
-    state.has_matching = false
-    if (state.candidates.length > 0) {
-      let matchingId = state.candidates[0].matching_id
-      state.matchingId = matchingId
-
-      let companyId = state.candidates[0].company_id
-      state.companyId = companyId
-
-      let topN = 20
-      console.log(matchingId, companyId, topN)
-      commit('getProductCompanyMatchings', { matchingId, companyId, topN })
-    } else {
-      this.getCandidates()
-    }
+  nextCandidate ({ commit, state, dispatch }) {
+    state.matchingsToPost = []
+    state.matchingsToDelete = []
+    dispatch('shiftCandidates')
   },
-  defferProduct ({ commit, state }, { matchingId, companyId }) {
+  defferProduct ({ commit, state, dispatch }, { matchingId, companyId }) {
+    state.matchingsToPost = []
+    state.matchingsToDelete = []
     let host = state.host
     state.has_matching = false
     let params = {
@@ -72,49 +63,47 @@ const actions = {
     }).then(response => {
       const resp = response.data
       if (resp.status === 'success') {
-        state.candidates.shift()
-        if (state.candidates.length > 0) {
-          let matchingId = state.candidates[0].matching_id
-          state.matchingId = matchingId
-
-          let companyId = state.candidates[0].company_id
-          state.companyId = companyId
-
-          let topN = 15
-          console.log(matchingId, companyId, topN)
-          commit('getProductCompanyMatchings', { matchingId, companyId, topN })
-        } else {
-          this.getCandidates()
-        }
+        dispatch('shiftCandidates')
       }
     })
       .catch(e => {
         console.log(e)
       })
   },
-  matchProduct ({ commit, state }, { matchingId, companyId, companyMatchingId }) {
-    console.log(matchingId, companyId, companyMatchingId)
-    let host = state.host
-    let params = {
-      'matching_id': matchingId,
-      'company_id': companyId,
-      'company_matching_id': companyMatchingId
+  acceptChanges ({ commit, state, dispatch }, { matchingId, companyId }) {
+    let matchingsToPost = state.matchingsToPost
+    if (matchingsToPost.length > 0) {
+      state.matchingsToPost = []
+      for (let i = 0; i < matchingsToPost.length; i++) {
+        let companyMatchingId = matchingsToPost[i]
+        commit('matchProduct', { matchingId, companyId, companyMatchingId })
+      }
     }
-    axios.post(host.concat('products-matching/matching'), params, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache'
+
+    let matchingsToDelete = state.matchingsToDelete
+    if (matchingsToDelete.length > 0) {
+      state.matchingsToDelete = []
+      for (let i = 0; i < matchingsToDelete.length; i++) {
+        console.log(matchingsToDelete[i])
       }
-    }).then(response => {
-      const resp = response.data
-      if (resp.status === 'success') {
-        state.has_matching = true
-      }
-    })
-      .catch(e => {
-        console.log(e)
-      })
+    }
+    dispatch('shiftCandidates')
+  },
+  shiftCandidates ({ commit, state }) {
+    state.candidates.shift()
+    if (state.candidates.length > 0) {
+      let matchingId = state.candidates[0].matching_id
+      state.matchingId = matchingId
+
+      let companyId = state.candidates[0].company_id
+      state.companyId = companyId
+
+      let topN = 15
+      console.log(matchingId, companyId, topN)
+      commit('getProductCompanyMatchings', { matchingId, companyId, topN })
+    } else {
+      this.getCandidates()
+    }
   },
   getCandidates ({ commit, state }, { c1, c2 }) {
     console.log(c1, c2)
@@ -123,7 +112,6 @@ const actions = {
     let params = {
       'company_id': c1,
       'company_to_search': c2
-      // 'company_id': 'lmmarket'
     }
     axios.get(host.concat('products-matching/get_candidates'), {
       params: params,
@@ -205,8 +193,38 @@ const mutations = {
         console.log(e)
       })
   },
-  shiftCandidates (state) {
-    state.candidates.shift()
+  addMatchingToPost (state, matchingId) {
+    state.matchingsToPost.push(matchingId)
+  },
+  addMatchingToDelete (state, matchingId) {
+    state.matchingsToDelete.push(matchingId)
+  },
+  removeMatchingFromPost (state, matchingId) {
+    state.matchingsToPost = state.matchingsToPost.filter(function (value, index, arr) {
+      return value !== matchingId
+    })
+  },
+  matchProduct (state, { matchingId, companyId, companyMatchingId }) {
+    console.log(matchingId, companyId, companyMatchingId)
+    let host = state.host
+    let params = {
+      'matching_id': matchingId,
+      'company_id': companyId,
+      'company_matching_id': companyMatchingId
+    }
+    axios.post(host.concat('products-matching/matching'), params, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache'
+      }
+    }).then(response => {
+      const resp = response.data
+      console.log(matchingId, companyMatchingId, resp)
+    })
+      .catch(e => {
+        console.log(e)
+      })
   }
 }
 
